@@ -1,0 +1,84 @@
+[=]NOTES{
+notes113454 = """Notes:
+1. Python code that will be executed in the same scope that the rest of vcserver.py is in.
+2. Make sure to have an if statement checking if a command was actually sent (i.e. if 'CMDNAME' == datstr)
+3. The only predefined objects you have to work with are the connections dictionary, data byte object, datstr str object (data but str), and addr str object.
+4. If you want to examine all packets, don't use an if statement.
+5. In theory, the [\=]NAME is just to organize, you could in practice have it all under one {}. But it'd look highly unorganized.
+
+6. Use the helpers module to help you. helpers.debyte() removes the " b'' " from byte objects, amongst other things.
+7. Turn boolean rancmd to TRUE to stop the relaying of packets (stop the packet here and do not relay it to other)
+8. Use netsetting('settingname') to get settings from config.cbedata
+
+From here you can do literally anything, from automatically routing calls, to accepting or rejecting connections, to making the world's stupidest remote desktop protocol.
+
+To send commands such as CHDIAL back, just use connectionobject.transmit(commandstrasbytesobject)
+"""}
+
+
+[=]CONNECT{
+helpw = helpers.filegeta('acceptnoaccept.txt')
+print(addr[0])
+if 'CONNECT' in datstr:
+    dats = helpers.debyte(datstr).split(' ')
+    valid = False
+
+    try:
+        connections[dats[3]] = Connection(dats[1], int(dats[2]), {'dialto': str(dats[4])} )
+        print('>> CONNECT command issued, opened connection to',dats[1],'port',dats[2],', connection-name:',dats[3],', dialed:',dats[4])
+        connections[dats[3]].info()
+        rancmd = True
+        #connections[dats[3]].transmit(b'CHDIAL 00000511')
+        valid = True
+    except:
+        print('Invalid CONNECT command params, failed to connect.')
+
+    if str(addr[0]) + ' cantjoin ALL' in helpw and valid:
+        connections[dats[3]].transmit(b'RelayError/RejectedConection/AllRelayIPBan')
+        connections[dats[3]].close()
+        del connections[dats[3]]
+        print('The above connection was rejected and closed (RelayError/RejectedConection/AllRelayIPBan) ')
+    elif str(addr[0]) + ' cantjoin '+dats[4] in helpw and valid:
+        connections[dats[3]].transmit(b'RelayError/RejectedConection/SpecficDialBan')
+        connections[dats[3]].close()
+        del connections[dats[3]]
+        print('The above connection was rejected and closed (RelayError/RejectedConection/SpecficDialBan)')
+    else:
+        try:
+            connections[dats[3]].transmit(b'AcceptedConection')
+            allowedtospeakid.append(dats[3])
+            print('IDs: '+str(allowedtospeakid))
+        except:
+            print('Invalid CONNECT command params, failed to connect.')
+}
+
+[=]DCONECT{
+if 'DCONECT' in datstr:
+    dats = helpers.debyte(datstr).split(' ')
+    connections[dats[1]].close()
+    print('>> DISCONNECT command issued, closing connection: '+dats[1])
+    try:
+        del connections[dats[1]]
+        allowedtospeakid.remove(dats[1])
+    except:
+        print('KeyError: the connection that the client has sent an ID of which is invalid.')
+        rancmd = True
+}
+
+[=]PING{
+if 'PING' in datstr:
+	for key in connections:
+		connections[key].transmit(b'Server Ping Response.')
+}
+
+[=]NAPACKET{
+if len(data) < 250:
+    print('Nonaudio packet:',data)
+}
+
+
+[=]PKTCHECKER{
+if netsetting('allowrandinp') == 'NO' and not ins(str(data[9-1:12]).replace("b'", "").replace("'", ""), allowedtospeakid):
+    rancmd = True
+    print('RelayError/WillNotRelayOutsidePacket')
+}

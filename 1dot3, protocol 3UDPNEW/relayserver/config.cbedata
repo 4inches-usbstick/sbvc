@@ -1,0 +1,16 @@
+class[main>
+
+class[networking>
+listento==1712;
+channels==MULTIPLE_OPENSTANDARD;
+tellmewhymypacketswerenotrelayed==YES;
+selfreflect==YES;
+allowrandinp==NO;
+]
+]
+
+class[notes>
+notes==
+
+1. The only valid modes are: SINGLE, MULTIPLE_LEGACYSTRICT, MULTIPLE_OPENSTANDARD and SXS_PROXY
+;

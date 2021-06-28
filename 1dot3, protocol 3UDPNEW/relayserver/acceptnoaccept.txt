@@ -1,0 +1,1 @@
+Use NORELAY 12345678 to block the relaying of any packets bound for 12345678 (so essentially, accept but not relay to the rest of the group.
