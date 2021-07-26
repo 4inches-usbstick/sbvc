@@ -1,0 +1,10 @@
+class[main>
+
+class[networking>
+listento==1712;
+channels==NORMAL;
+tellmewhymypacketswerenotrelayed==NO;
+selfreflect==YES;
+allowrandinp==NO;
+]
+]

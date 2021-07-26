@@ -1,0 +1,32 @@
+if 'FOCUS ' in netsetting('channels'):
+    thedial = netsetting('channels').split(' ')[1]
+    print('<Info> Only packets bound for '+thedial+' will be relayed.')
+    while True:
+        data, addr = sock.recvfrom(60000) 
+        datstr = str(data)
+        relay = True
+        #print('Incoming packet, first initials: '+str(data[0:10])+'')
+        if 'CONNECT' in datstr:
+            dats = helpers.debyte(datstr).split(' ')
+            connections[dats[3]] = Connection(dats[1], int(dats[2]), {'dialto': str(dats[4])} )
+            print('>> CONNECT command issued, opened connection to',dats[1],'port',dats[2],', connection-name:',dats[3],', dialed:',dats[4])
+            relay = False
+            connections[dats[3]].info()
+        if 'PING' in datstr:
+            dats = helpers.debyte(datstr).split(' ')
+            connections[dats[1]].transmit(b'Pong!')
+            relay = False
+        if 'DCONECT' in datstr:
+            dats = helpers.debyte(datstr).split(' ')
+            connections[dats[3]].close()
+            print('>> DISCONNECT command issued, closing connection: '+dats[3])
+            del connections[dats[3]]
+            relay = False
+        if relay:
+            for key in connections:
+                #datstrlist = datstr.split(':')
+                #print(str(connections[key].meta['dialto']))
+                #print(str(data[0:8]).replace("b'", "").replace("'", ""))
+                if connections[key].meta['dialto'] == thedial: #CHANGE ADDR
+                    connections[key].transmit(data)
+                #only relay if the provided dialto is the same as the one the connection takes
