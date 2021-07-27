@@ -161,7 +161,7 @@ if mode0 == 'NORMAL':
             relay = False
         
         if relay:
-            print("Packet from: "+str(data[0:8]).replace("b'", "").replace("'", "")+' '+str(addr[0]))
+            print("Packet from: "+str(data[0:8]).replace("b'", "").replace("'", "")+' '+str(addr[0])+' '+str(data[9-1:12]).replace("b'", "").replace("'", "")+' '+str(allowedtospeakid))
             for key in connections:
                 #datstrlist = datstr.split(':')
                 #print(str(connections[key].meta['dialto']))
