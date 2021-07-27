@@ -17,5 +17,6 @@ UDP_IP = netsetting('remoteserver') #the remote server to push to (in this case,
 UDP_PORT = int(netsetting('udptalkingport')) #the port that the remote server listens to
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
+print('Commands:\nCONNECT LOCAL_IP LISTEN_PORT CONNECTION_NAME DIAL_DESTIONATION\nDCONECT LOCAL_IP\n\nMake sure to have pull.py open for any output.')
 while True:
     sock.sendto(bytes(input('$ '), 'utf-8'), (UDP_IP, UDP_PORT))
